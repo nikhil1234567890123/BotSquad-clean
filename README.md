@@ -4,7 +4,7 @@
 
 - **Nishika Rawat** – [nishikapnp2004@gmail.com]  
 - **Nikhil Kaundal** – [nikhilkaundal1257@gmail.com]  
-- **Rhythm Pandey** – [rhythm-email@example.com]  
+- **Rhythm Pandey** – [rhythmjk30@gmail.com]  
 - **Manthan Dhiman** – [dhimaan0011@gmail.com]
 
 ## 📌 Assigned Problem Statement
