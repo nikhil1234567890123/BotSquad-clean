@@ -3,9 +3,9 @@
 ## 👥 Team Members
 
 - **Nishika Rawat** – [nishikapnp2004@gmail.com]  
-- **Nikhil Kaundal** – [nikhil-email@example.com]  
+- **Nikhil Kaundal** – [nikhilkaundal1257@gmail.com]  
 - **Rhythm Pandey** – [rhythm-email@example.com]  
-- **Manthan Dhiman** – [manthan-email@example.com]
+- **Manthan Dhiman** – [dhimaan0011@gmail.com]
 
 ## 📌 Assigned Problem Statement
 
