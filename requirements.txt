@@ -1,0 +1,7 @@
+langchain
+llama-index
+chromadb
+beautifulsoup4
+requests
+fastapi
+uvicorn
