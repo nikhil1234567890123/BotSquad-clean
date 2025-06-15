@@ -33,9 +33,7 @@ body:
       description: Briefly describe the problem your project aims to solve
       placeholder: he Panjab University (PU) website has a lot of admission-related information, but it is spread across many different pages and is not easy to find. New or interested students often get confused while searching for details like course options, eligibility, last dates, fees, or how to apply.
 
-Right now, there is no system or assistant that can help students quickly get clear and accurate answers to their questions.
-
-To solve this, we are building a smart AI chatbot that will use the RAG (Retrieval-Augmented Generation) method. This chatbot will understand the user’s questions and give answers based on real data from the PU website. It will help save time, reduce confusion, and make the admission process easier for both students and the university staff.
+Right now, there is no system or assistant that can help students quickly get clear and accurate answers to their questions. To solve this, we are building a smart AI chatbot that will use the RAG (Retrieval-Augmented Generation) method. This chatbot will understand the user’s questions and give answers based on real data from the PU website. It will help save time, reduce confusion, and make the admission process easier for both students and the university staff.
     validations:
       required: true
 
