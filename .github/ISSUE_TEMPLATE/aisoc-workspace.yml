@@ -20,9 +20,11 @@ body:
       label: 👥 Team Details
       description: Provide the team name, member names, and email addresses
       placeholder: |
-        - Team Name: The Innovators
-        - Member 1: Alice Smith (alice@email.com)
-        - Member 2: Bob Johnson (bob@email.com)
+        - Team Name: BotSquad
+        - Member 1: Nishika Rawat – [nishikapnp2004@gmail.com]
+        -Member 2: Nikhil Kaundal – [nikhilkaundal1257@gmail.com]
+        -Member 3: Rhythm Pandey – [rhythmjk30@gmail.com]
+        -Member 4: Manthan Dhiman – [dhimaan0011@gmail.com] 
     validations:
       required: true
 
