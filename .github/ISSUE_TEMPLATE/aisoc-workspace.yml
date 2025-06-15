@@ -10,7 +10,7 @@ body:
     attributes:
       label: 🧠 Project Title
       description: Briefly describe the title of your project
-      placeholder: e.g. AI-powered Slack FAQ Bot
+      placeholder: RAG-based chatbot for Panjab University admission queries
     validations:
       required: true
 
