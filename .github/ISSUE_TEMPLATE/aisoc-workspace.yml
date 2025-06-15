@@ -64,10 +64,12 @@ body:
       label: 📅 Timeline & Milestones
       description: Provide a timeline with measurable milestones (e.g. weekly)
       placeholder: |
-        - Week 1–2: Requirement gathering and architecture design
-        - Week 3–4: Initial development and testing
-        - Week 5–6: Feature finalization and integration
-        - Week 7–8: Final testing and documentation
+       -Week 1:	Finalize target URLs and initiate scraping via Playwright
+       -Week 2:	Complete PDF scraping and store all data in .csv files
+       -Week 3:	Clean and chunk data, create embeddings, and index with FAISS
+       -Week 4:	Integrate with LLM via LlamaIndex and test chatbot functionality
+       -Week 5:	Design UI, finalize chatbot, deploy, and prepare documentation
+
     validations:
       required: true
 
