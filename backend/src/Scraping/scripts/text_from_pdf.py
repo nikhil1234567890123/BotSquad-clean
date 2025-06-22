@@ -16,7 +16,7 @@ with open("pu_pdf_data.csv", "w", newline="", encoding="utf-8") as csv_file:
 
     for i, url in enumerate(pdf_links, 1):
         try:
-            print(f"📥 Processing {i}/{len(pdf_links)}: {url}")
+            print(f"Processing {i}/{len(pdf_links)}: {url}")
 
             headers = {
                 "User-Agent": "Mozilla/5.0",
@@ -27,7 +27,7 @@ with open("pu_pdf_data.csv", "w", newline="", encoding="utf-8") as csv_file:
 
             # Skip if request failed or content is not a PDF
             if response.status_code != 200 or "application/pdf" not in response.headers.get("Content-Type", ""):
-                print(f"❌ Skipping (status {response.status_code}): {url}")
+                print(f"Skipping (status {response.status_code}): {url}")
                 with open("failed_pdfs.txt", "a", encoding="utf-8") as fail_log:
                     fail_log.write(f"{url} - status {response.status_code}\n")
                 continue
@@ -49,10 +49,10 @@ with open("pu_pdf_data.csv", "w", newline="", encoding="utf-8") as csv_file:
             sleep(0.5)  # be polite to server
 
         except Exception as e:
-            print(f"❌ Exception for {url}: {e}")
+            print(f"Exception for {url}: {e}")
             with open("failed_pdfs.txt", "a", encoding="utf-8") as fail_log:
                 fail_log.write(f"{url} - exception: {e}\n")
             continue
 
-print("✅ All PDFs processed and saved to pu_pdf_data.csv")
+print("All PDFs processed and saved to pu_pdf_data.csv")
 
