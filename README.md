@@ -1,4 +1,4 @@
-# AISOC Summer Internship – Team [Your Team Name]
+# AISOC Summer Internship – Team BotSquad
 
 ## 👥 Team Members
 
