@@ -38,3 +38,14 @@ pip install -r requirements.txt
 
 # Step 4: Run the chatbot (example using Streamlit)
 streamlit run app.py
+```
+
+## 📅 Timeline and Milestones  
+| Week | Milestone                                                   |
+|------|--------------------------------------------------------------|
+| 1    | Project setup, repository structuring, scraping strategy planned |
+| 2    | Website and PDF scraping completed, raw data stored         |
+| 3    | Data cleaning, preprocessing, and chunking finalized        |
+| 4    | Embedding with HuggingFace, indexing via LlamaIndex         |
+| 5    | Chatbot development and Streamlit interface integration     |
+| 6    | Final testing, documentation, demo upload, and presentation prep |
