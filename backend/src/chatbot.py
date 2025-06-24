@@ -19,14 +19,14 @@ db = Chroma(
 )
 
 # Print total documents in the vector store
-print(f"\n📦 Total Documents in Vector DB: {len(db.get()['ids'])}")
+print(f"\n Total Documents in Vector DB: {len(db.get()['ids'])}")
 
 # Create retriever
 retriever = db.as_retriever()
 
 # Initialize a supported HuggingFace LLM endpoint
 llm = HuggingFaceEndpoint(
-    repo_id="google/flan-t5-base",  # ✅ working model
+    repo_id="google/flan-t5-base", 
     temperature=0.3,
     max_new_tokens=512
 )
@@ -39,14 +39,14 @@ qa_chain = RetrievalQA.from_chain_type(
 
 # Chat loop
 while True:
-    query = input("\n❓ Ask a PU Admission Question (or type 'exit'): ").strip()
+    query = input("\n Ask a PU Admission Question (or type 'exit'): ").strip()
     if query.lower() == "exit":
-        print("👋 Exiting chatbot. Goodbye!")
+        print("Exiting chatbot. Goodbye!")
         break
 
     try:
         result = qa_chain.invoke({"query": query})
         print("🤖", result["result"])
     except Exception as e:
-        print("⚠️ Error occurred while processing your question:")
+        print("Error occurred while processing your question:")
         traceback.print_exc()
