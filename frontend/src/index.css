@@ -424,3 +424,31 @@ button {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(4px); }
 }
+/* Modern, pill style quick tags */
+.quick-tags-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.quick-tag {
+  background: #fff;
+  color: #b30000;
+  border: 1px solid #b30000;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.quick-tag:hover {
+  background: #b30000;
+  color: #fff;
+}
+
+/* Follow-up title style if needed */
+.follow-up-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #333;
+}
