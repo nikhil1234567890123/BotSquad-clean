@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 import { FiSend } from "react-icons/fi";
 import { FaCommentDots, FaTimes, FaArrowDown } from "react-icons/fa";
 import "./index.css";
@@ -8,6 +9,7 @@ type Message = {
   text: string;
   time: string;
   quickTags?: string[];
+  pdfUrl?: string; 
 };
 
 const BACKEND_URL = "http://127.0.0.1:5000/api/chat";
@@ -66,8 +68,13 @@ const App = () => {
       const botTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       setMessages(prev => [
         ...prev,
-        { role: "bot", text: data.reply, time: botTime },
-        { role: "followup", text: "Know more about:", time: botTime, quickTags: data.followups }
+        {
+          role: "bot",
+          text: data.reply,
+          time: botTime,
+          pdfUrl: data.pdf || null 
+        },
+        { role: "followup", text: "", time: botTime, quickTags: data.follow_ups }
       ]);
     } catch (err) {
       console.error(err);
@@ -97,7 +104,7 @@ const App = () => {
               <div className="pu-logo-wrapper">
                 <img src="pu-logo.png" alt="PU Logo" className="pu-logo" />
               </div>
-              <h1>PU AI Assistant</h1>
+              <h1>PU Assistant</h1>
             </div>
             <button onClick={() => setOpen(false)} style={{ color: "white", fontSize: "18px" }}>
               <FaTimes />
@@ -120,7 +127,19 @@ const App = () => {
                   </div>
                 ) : (
                   <div className={`message-bubble ${msg.role}`}>
-                    {msg.text}
+                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+
+                    {msg.pdfUrl && (
+                      <a
+                        href={msg.pdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="download-pdf-btn"
+                      >
+                        📄 Download Fee Structure PDF
+                      </a>
+                    )}
+
                     {msg.quickTags && (
                       <div className="quick-tags-inline">
                         {msg.quickTags.map((tag, idx) => (

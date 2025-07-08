@@ -53,9 +53,9 @@ def generate_answer(query):
     nodes = retriever.retrieve(query)
     doc_texts = [node.get_content() for node in nodes]
 
-    top_docs = rerank(query, doc_texts)[:3]
+    #top_docs = rerank(query, doc_texts)[:3]
 
-    context = "\n\n---\n\n".join(top_docs)
+    context = "\n\n---\n\n".join(doc_texts)  # Use top 3 docs directly for simplicity)
 
     prompt = f"""
 You are **PU-Assistant**, the official virtual helpdesk for Panjab University, Chandigarh.

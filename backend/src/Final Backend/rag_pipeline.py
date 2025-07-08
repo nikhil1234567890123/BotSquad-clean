@@ -1,6 +1,9 @@
 # rag_pipeline.py
 import os
 from dotenv import load_dotenv
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
+
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.llms.groq import Groq
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
@@ -8,30 +11,28 @@ from llama_index.core import load_index_from_storage, StorageContext
 from chromadb import PersistentClient
 from sentence_transformers import CrossEncoder
 
-# Load environment variables
 load_dotenv()
 
-# Initialize LLM
+app = Flask(__name__)
+CORS(app) 
+
 llm = Groq(model="llama3-8b-8192", api_key=os.getenv("GROQ_API_KEY"))
 
-# Initialize embedding model
 embed_model = HuggingFaceEmbedding(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-# Persistent vector DB setup
-persist_dir = "./chroma_db2"
+persist_dir = "./chroma_db1"
 client = PersistentClient(path=persist_dir)
 collection = client.get_or_create_collection("rag-collection")
 vector_store = ChromaVectorStore(chroma_collection=collection, persist_dir=persist_dir)
 
-# Load vector index
 storage_context = StorageContext.from_defaults(
     persist_dir="./index",
     vector_store=vector_store
 )
 index = load_index_from_storage(storage_context, embed_model=embed_model)
 
-# Initialize re-ranker
 reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+
 
 def rerank(query, docs):
     """
@@ -42,49 +43,72 @@ def rerank(query, docs):
     sorted_docs = [doc for _, doc in sorted(zip(scores, docs), reverse=True)]
     return sorted_docs
 
+
 def generate_answer(query):
     """
-    Retrieve relevant docs, generate answer & extract follow-up suggestions.
+    Retrieve relevant docs, build context, prompt LLM and format answer.
     """
     retriever = index.as_retriever(similarity_top_k=10)
     nodes = retriever.retrieve(query)
     doc_texts = [node.get_content() for node in nodes]
 
-    top_docs = rerank(query, doc_texts)[:3]
-    context = "\n\n---\n\n".join(top_docs)
+    #top_docs = rerank(query, doc_texts)[:3]
+    context = "\n\n---\n\n".join(doc_texts)
 
     prompt = f"""
-You are **PU-Assistant**, the official virtual helpdesk for Panjab University, Chandigarh.
+You are **PU-Assistant**, the official AI helpdesk chatbot of Panjab University, Chandigarh.
 
-Please answer the student's question **strictly using only the information provided below**.
+You must strictly answer the student's question **only using the verified information provided below**.
+Follow these exact guidelines carefully to keep answers accurate, formal, polite, and helpful:
 
-**Answering Rules:**
-- If the question is about eligibility, process, fee, or form → reply in **brief bullet points**.
-- If there’s a useful **URL or downloadable form**, mention it politely at the end.
-- For simple factual or definition questions → reply in **one clear sentence**.
-- If the answer isn’t in the provided info → politely say:
-   > "Sorry, I couldn't find that information. You may contact the university administration."
-- Never mention "context", "source", "data not found", or talk about missing info.
-- Always use only ₹ amounts if both ₹ and $ are present.
-- Use **formal, polite tone**.
-- End with:
-   **Know more about:**
-   - (follow-up question 1)
-   - (follow-up question 2)
-   - (follow-up question 3)
+**Answering rules (read carefully and apply strictly):**
+1. If the question is about eligibility, steps, rules, process, fee, or form:
+   → answer clearly using neat bullet points (max 4–6).
+2. For simple factual or definition-type questions, reply in **one direct, precise sentence**.
+3. If the context includes any web page, URL, downloadable form, or PDF:
+   → always add it in the answer as a clickable markdown link,
+   e.g. [Visit official website](https://example.com)
+   → do NOT add any link unless it truly exists in the context.
+4. Links must open in a new browser tab when rendered.
+5. Never guess, create, or hallucinate a URL or link that is not clearly present in the provided context.
+6. If both ₹ (INR) and $ (USD) amounts are found:
+   → always mention only the ₹ fee amount.
+7. If the answer is genuinely missing:
+   → politely respond with one of these:
+   > *Sorry, I couldn't find that information. Please contact the university administration.*
+   or
+   > *Sorry, I couldn't help you with that. Please check the official website.*
+   (choose whichever fits better, without mentioning missing data, context, or source).
+8. Do NOT mention words like “context”, “data not found”, “source missing” etc.
+9. Keep the tone formal, professional, and polite.
+10. Avoid repetition; answer directly without unnecessary introduction or disclaimers.
 
-ℹ **Information**:
+**At the end**:
+- Suggest exactly three follow-up questions related to Panjab University admission, fees, process, scholarships, hostels, or campus facilities.
+- Each question must be short (max 5–6 words).
+- Do NOT repeat the same topic as the user’s original question.
+- Do NOT use the same topic twice.
+- Format strictly as:
+ **Know more about:**
+ - Question 1
+ - Question 2
+ - Question 3
+
+---
+
+**Information you must use**:
 {context}
 
-Question: {query}
+**Student’s Question**:
+{query}
 
-Answer:
+ **Your Answer**:
 """
 
     response = llm.complete(prompt)
     full_text = response.text.strip()
 
-    # Extract follow-up lines
+  
     follow_ups = []
     if "**Know more about:**" in full_text:
         parts = full_text.split("**Know more about:**")
@@ -97,4 +121,25 @@ Answer:
     else:
         answer_main = full_text
 
-    return {"reply": answer_main, "follow_ups": follow_ups}
+    pdf_url = None
+    if "fee" in query.lower() or "fees" in query.lower():
+        pdf_url = "http://127.0.0.1:5000/files/pu_fee_structure.pdf"
+
+    return {"reply": answer_main, "follow_ups": follow_ups, "pdf": pdf_url}
+
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    user_query = data.get('message', '')
+    answer = generate_answer(user_query)
+    return jsonify(answer)
+
+
+@app.route('/files/<path:filename>', methods=['GET'])
+def download_file(filename):
+    return send_from_directory('static', filename, as_attachment=True)
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
