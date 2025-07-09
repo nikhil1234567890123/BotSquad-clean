@@ -27,3 +27,9 @@ venv/
 *.dll
 *.lib
 __pycache__/
+venv/
+frontend/src/venv/
+*.dll
+*.lib
+*.pyd
+__pycache__/
