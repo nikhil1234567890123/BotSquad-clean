@@ -33,11 +33,11 @@ button {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  width: 350px;
+  width: 430px;
   height: 500px;
   background-color: #fdf4f1;
   border: 1px solid #fca5a5;
-  border-radius: 12px;
+  border-radius: 25px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -93,15 +93,15 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
-  width: 36px;
+  height: 32px;
+  width: 32px;
   overflow: hidden;
   flex-shrink: 0;
 }
 
 .pu-logo {
-  height:70px;
-  width: 70px;
+  height:60px;
+  width: 60px;
   object-fit: contain;
 }
 
@@ -423,4 +423,142 @@ button {
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(4px); }
+}
+/* Modern, pill style quick tags */
+.quick-tags-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.quick-tag {
+  background: #fff;
+  color: #b30000;
+  border: 1px solid #b30000;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.quick-tag:hover {
+  background: #b30000;
+  color: #fff;
+}
+
+/* Follow-up title style if needed */
+.follow-up-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #333;
+}
+/* Message bubbles */
+.message-bubble.bot {
+  background: #fff;
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin: 4px 0;
+  max-width: 90%;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.2;
+  word-break: break-word;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.message-bubble.user {
+  background:rgb(190, 34, 34);
+  border-radius: 12px;
+  padding: 2px 12px;
+  margin: 2px 0;
+  max-width: 70%;
+  font-size: 14px;
+  color: white;
+  line-height: 1.4;
+}
+
+.message-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.message-row.user {
+  align-items: flex-end;
+}
+
+/* ReactMarkdown content styling */
+.message-bubble.bot h1, .message-bubble.bot h2, .message-bubble.bot strong {
+  color: #b30000; /* university red */
+  margin: 5px 0;
+}
+
+.message-bubble.bot ul, .message-bubble.bot ol {
+  margin: 1px 0;
+  padding-left: 12px;
+}
+
+.message-bubble.bot li {
+  margin-bottom: 1px;
+}
+
+.quick-tags-inline .quick-tag {
+  background:rgb(241, 240, 240);
+  border: 1px solidrgb(255, 102, 102);
+  padding: 5px 5px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin: 1px;
+  font-size: 12px;
+}
+.quick-tag:hover {
+  background: #b30000;
+  color: white;}
+
+.chat-body {
+  padding: 8px;
+  overflow-y: auto;
+}
+
+/* Input box tight */
+.input-box input {
+  padding: 6px 10px;
+  font-size: 14px;
+}
+.pdf-link {
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+.pdf-link a {
+  color: #d32f2f; /* red color */
+  text-decoration: underline;
+}
+.message-bubble {
+  max-width: 70%;
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  line-height: 1.4;
+}
+
+.message-bubble p,
+.message-bubble li,
+.message-bubble ul,
+.message-bubble h1,
+.message-bubble h2,
+.message-bubble h3 {
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.message-row {
+  margin: 4px 0;
+}
+
+.message-time {
+  font-size: 10px;
+  opacity: 0.6;
+  margin-top: 2px;
 }
