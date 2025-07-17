@@ -34,12 +34,14 @@ def load_index(persist_dir="./chroma_db1", index_dir="./index", embed_model=None
 
 def initialize_pipeline():
     load_environment()
+    embed_model = init_embed_model()
+    vector_store = init_vector_store()
     return {
         "llm": init_llm(),
-        "embed_model": init_embed_model(),
+        "embed_model": embed_model,
         "reranker": init_reranker(),
-        "vector_store": init_vector_store(),
-        "index": load_index(embed_model=init_embed_model(), vector_store=init_vector_store())
+        "vector_store": vector_store,
+        "index": load_index(embed_model=embed_model, vector_store=vector_store)
     }
 
 # ---------- SESSION ----------
@@ -63,7 +65,6 @@ def generate_answer(query, pipeline):
     retriever = index.as_retriever(similarity_top_k=3)
     context = "\n\n---\n\n".join(node.get_content() for node in retriever.retrieve(query))
 
-    # ✅ Prompt with fixed rule
     prompt = f"""
 You are PU-Assistant, the official AI helpdesk chatbot of Panjab University, Chandigarh.
 
@@ -148,11 +149,9 @@ Follow-Up Suggestions (only after giving a complete answer):
 **Your Answer:**
 """.strip()
 
-    # Get answer from LLM
     response = llm.complete(prompt)
     full_text = response.text.strip()
 
-    # Parse follow_ups
     answer_main = full_text
     follow_ups = []
     if "Know more about:" in full_text:
@@ -161,12 +160,11 @@ Follow-Up Suggestions (only after giving a complete answer):
         follow_lines = parts[1].strip().splitlines()
         follow_ups = [line.replace("-", "").strip() for line in follow_lines if line.strip()]
 
-    # Detect intent & add friendly link
-    pdf_url = None
-    detected_link = None
-    friendly_label = None
     query_lower = query.lower()
+    friendly_label = None
+    pdf_url = None
 
+    detected_link = None
     for intent, data in intent_to_url.items():
         keywords = data.get("keywords", [])
         urls = data.get("urls", [])
@@ -174,23 +172,21 @@ Follow-Up Suggestions (only after giving a complete answer):
             detected_link = urls[0] if isinstance(urls, list) else urls
             break
 
-    if "fee" in query_lower or "fees" in query_lower:
+    if "fee" in query_lower and "pdf" not in answer_main.lower():
         pdf_url = "http://127.0.0.1:5000/files/pu_fee_structure.pdf"
         friendly_label = f"\n\n📄 [Download official fee PDF here]({pdf_url})"
-    elif detected_link:
+    elif detected_link and detected_link not in answer_main:
         if "admission" in query_lower or "apply" in query_lower:
             friendly_label = f"\n\n🌐 [Visit official admission portal]({detected_link})"
         else:
             friendly_label = f"\n\n🔗 [Visit official related page]({detected_link})"
 
-    if friendly_label:
+    if friendly_label and friendly_label not in answer_main:
         answer_main += friendly_label
 
     return {
         "reply": answer_main,
-        "follow_ups": follow_ups if follow_ups else ["Scholarships", "Hostels", "Campus Life"],
-        "pdf": pdf_url,
-        "link": detected_link
+        "follow_ups": follow_ups if follow_ups else ["Scholarships", "Hostels", "Campus Life"]
     }
 
 # ---------- FLASK ----------
@@ -208,7 +204,6 @@ def chat():
 @app.route('/files/<path:filename>', methods=['GET'])
 def download_file(filename):
     return send_from_directory('static', filename, as_attachment=True)
-
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
