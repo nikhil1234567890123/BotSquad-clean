@@ -66,7 +66,7 @@ def generate_answer(query, pipeline):
     retriever = index.as_retriever(similarity_top_k=3)
     context = "\n\n---\n\n".join(node.get_content() for node in retriever.retrieve(query))
 
-    prompt = f"""
+     prompt = f"""
 You are PU-Assistant, the official AI helpdesk chatbot of Panjab University, Chandigarh.
 
 You must answer the student's query **strictly** using the verified information provided below in the context.
