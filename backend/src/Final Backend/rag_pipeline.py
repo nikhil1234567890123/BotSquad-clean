@@ -3,13 +3,12 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from llama_index.core import StorageContext, load_index_from_storage
-from llama_index.vector_stores.chroma import ChromaVectorStore  # Keep this or see alternative below
+from llama_index.core.vector_stores import ChromaVectorStore  # Updated import
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.groq import Groq
 from chromadb import PersistentClient
 from sentence_transformers import CrossEncoder
 from intent_links import intent_to_url
-
 
 # ---------- ENV + INIT ----------
 def load_environment():
@@ -27,10 +26,13 @@ def init_reranker():
 def init_vector_store(persist_dir="./chroma_db", collection_name="rag-collection"):
     client = PersistentClient(path=persist_dir)
     collection = client.get_or_create_collection(collection_name)
-    return ChromaVectorStore(chroma_collection=collection, persist_path=persist_dir)
+    return ChromaVectorStore(chroma_collection=collection, persist_dir=persist_dir)  # Changed persist_path to persist_dir
 
 def load_index(persist_dir="./chroma_db", index_dir="./index", embed_model=None, vector_store=None):
-    storage_context = StorageContext.from_defaults(persist_dir=index_dir, vector_store=vector_store)
+    storage_context = StorageContext.from_defaults(
+        persist_dir=index_dir, 
+        vector_store=vector_store
+    )
     return load_index_from_storage(storage_context, embed_model=embed_model)
 
 def initialize_pipeline():
@@ -64,7 +66,8 @@ def generate_answer(query, pipeline):
         session["expecting_clarification"] = True
 
     retriever = index.as_retriever(similarity_top_k=3)
-    context = "\n\n---\n\n".join(node.get_content() for node in retriever.retrieve(query))
+    nodes = retriever.retrieve(query)
+    context = "\n\n---\n\n".join(node.node.get_content() for node in nodes)  # Updated node access
 
     prompt = f"""
 You are PU-Assistant, the official AI helpdesk chatbot of Panjab University, Chandigarh.
@@ -174,7 +177,7 @@ Follow-Up Suggestions (only after giving a complete answer):
             break
 
     if "fee" in query_lower and "pdf" not in answer_main.lower():
-        pdf_url = "http://127.0.0.1:5000/files/pu_fee_structure.pdf"
+        pdf_url = "/files/pu_fee_structure.pdf"  # Changed to relative path
         friendly_label = f"\n\n📄 [Download official fee PDF here]({pdf_url})"
     elif detected_link and detected_link not in answer_main:
         if "admission" in query_lower or "apply" in query_lower:
@@ -211,4 +214,4 @@ def health_check():
     return "OK", 200
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))  # Updated port handling
