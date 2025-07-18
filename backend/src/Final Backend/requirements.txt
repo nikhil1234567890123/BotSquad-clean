@@ -11,3 +11,4 @@ accelerate
 
 # Optional but safe to include:
 groq
+llama-index==0.12.48
