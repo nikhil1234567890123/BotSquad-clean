@@ -5,6 +5,7 @@ python-dotenv
 llama-index==0.12.48
 llama-index-vector-stores-chroma
 llama-index-embeddings-huggingface
+llama-index-llms-groq
 chromadb
 sentence-transformers
 transformers
