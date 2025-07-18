@@ -2,10 +2,9 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from llama_index.core import load_index_from_storage
-from llama_index.core.storage import StorageContext
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.core import StorageContext, load_index_from_storage
 from llama_index.vector_stores.chroma import ChromaVectorStore
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.groq import Groq
 from chromadb import PersistentClient
 from sentence_transformers import CrossEncoder
@@ -31,7 +30,7 @@ def init_vector_store(persist_dir="./chroma_db", collection_name="rag-collection
 
 def load_index(persist_dir="./chroma_db", index_dir="./index", embed_model=None, vector_store=None):
     storage_context = StorageContext.from_defaults(persist_dir=index_dir, vector_store=vector_store)
-    return load_index_from_storage(storage_context=storage_context, embed_model=embed_model)
+    return load_index_from_storage(storage_context, embed_model=embed_model)
 
 def initialize_pipeline():
     load_environment()
@@ -66,7 +65,7 @@ def generate_answer(query, pipeline):
     retriever = index.as_retriever(similarity_top_k=3)
     context = "\n\n---\n\n".join(node.get_content() for node in retriever.retrieve(query))
 
-     prompt = f"""
+    prompt = f"""
 You are PU-Assistant, the official AI helpdesk chatbot of Panjab University, Chandigarh.
 
 You must answer the student's query **strictly** using the verified information provided below in the context.
