@@ -3,7 +3,7 @@ flask-cors
 python-dotenv
 
 llama-index==0.12.48
-chromadb
+chromadb==0.4.24
 sentence-transformers
 transformers
 torch
