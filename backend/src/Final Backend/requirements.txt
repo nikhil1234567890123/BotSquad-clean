@@ -1,9 +1,9 @@
 flask
 flask-cors
 python-dotenv
-
-llama-index==0.9.48
-chromadb==0.4.14
-sentence-transformers
-transformers
+llama-index==0.10.32
+chromadb==0.4.24
+sentence-transformers==2.2.2
+transformers==4.40.1
 torch
+groqcloud
