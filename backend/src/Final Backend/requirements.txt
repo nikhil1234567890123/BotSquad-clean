@@ -2,7 +2,7 @@ flask
 flask-cors
 python-dotenv
 
-llama-index
+llama-index==0.12.48
 chromadb
 sentence-transformers
 transformers
@@ -11,4 +11,5 @@ accelerate
 
 # Optional but safe to include:
 groq
-llama-index==0.12.48
+
+
