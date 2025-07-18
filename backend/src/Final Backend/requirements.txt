@@ -1,17 +1,10 @@
-# Web server
 flask
 flask-cors
 python-dotenv
 
-# LlamaIndex core & required integrations
 llama-index==0.12.48
 chromadb
-
-# Embeddings and transformers
 sentence-transformers
 transformers
 torch
 accelerate
-
-# Optional (for Groq API use)
-groq
