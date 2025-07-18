@@ -7,3 +7,4 @@ sentence-transformers==2.2.2
 transformers==4.40.1
 torch
 groqcloud
+tokenizers==0.13.3
