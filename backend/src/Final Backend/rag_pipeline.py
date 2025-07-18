@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from llama_index.core import StorageContext, load_index_from_storage
-from llama_index.vector_stores.chroma import ChromaVectorStore  # Correct import for current versions
+from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.groq import Groq
 from chromadb import PersistentClient
@@ -26,7 +26,7 @@ def init_reranker():
 def init_vector_store(persist_dir="./chroma_db", collection_name="rag-collection"):
     client = PersistentClient(path=persist_dir)
     collection = client.get_or_create_collection(collection_name)
-    return ChromaVectorStore(chroma_collection=collection)
+    return ChromaVectorStore(chroma_collection=collection)  
 
 def load_index(persist_dir="./chroma_db", index_dir="./index", embed_model=None, vector_store=None):
     storage_context = StorageContext.from_defaults(
