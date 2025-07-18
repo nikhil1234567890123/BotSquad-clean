@@ -23,12 +23,12 @@ def init_embed_model():
 def init_reranker():
     return CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
 
-def init_vector_store(persist_dir="./chroma_db1", collection_name="rag-collection"):
+def init_vector_store(persist_dir="./chroma_db", collection_name="rag-collection"):
     client = PersistentClient(path=persist_dir)
     collection = client.get_or_create_collection(collection_name)
     return ChromaVectorStore(chroma_collection=collection, persist_path=persist_dir)
 
-def load_index(persist_dir="./chroma_db1", index_dir="./index", embed_model=None, vector_store=None):
+def load_index(persist_dir="./chroma_db", index_dir="./index", embed_model=None, vector_store=None):
     storage_context = StorageContext.from_defaults(persist_dir=index_dir, vector_store=vector_store)
     return load_index_from_storage(storage_context, embed_model=embed_model)
 
