@@ -9,8 +9,6 @@ from llama_index.llms.groq import Groq
 from chromadb import PersistentClient
 from sentence_transformers import CrossEncoder
 from intent_links import intent_to_url
-import llama_index
-print("🟢 Render is using LlamaIndex version:", llama_index.__version__)
 
 # ---------- ENV + INIT ----------
 def load_environment():
