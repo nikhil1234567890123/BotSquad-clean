@@ -21,7 +21,7 @@ llm = Groq(model="llama3-8b-8192", api_key=os.getenv("GROQ_API_KEY"))
 embed_model = HuggingFaceEmbedding(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
 # Persistent storage setup
-persist_dir = "./chroma_db2"
+persist_dir = "./chroma_db"
 client = PersistentClient(path=persist_dir)
 collection = client.get_or_create_collection("rag-collection")
 vector_store = ChromaVectorStore(chroma_collection=collection, persist_dir=persist_dir)

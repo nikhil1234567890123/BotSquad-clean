@@ -1,0 +1,13 @@
+flask
+flask-cors
+python-dotenv
+
+llama-index
+chromadb
+sentence-transformers
+transformers
+torch
+accelerate
+
+# Optional but safe to include:
+groq

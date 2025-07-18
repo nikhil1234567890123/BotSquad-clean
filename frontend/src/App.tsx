@@ -5,11 +5,11 @@ import { FaCommentDots, FaTimes, FaArrowDown } from "react-icons/fa";
 import "./index.css";
 
 type Message = {
-  role: "bot" | "user" | "followup";
+  role: "bot" | "user";
   text: string;
   time: string;
   quickTags?: string[];
-  pdfUrl?: string; 
+  pdfUrl?: string;
 };
 
 const BACKEND_URL = "http://127.0.0.1:5000/api/chat";
@@ -66,19 +66,24 @@ const App = () => {
       const data = await res.json();
 
       const botTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
       setMessages(prev => [
         ...prev,
         {
           role: "bot",
           text: data.reply,
           time: botTime,
-          pdfUrl: data.pdf || null 
-        },
-        { role: "followup", text: "", time: botTime, quickTags: data.follow_ups }
+          pdfUrl: data.pdf || undefined,
+          quickTags: data.follow_ups || []
+        }
       ]);
     } catch (err) {
       console.error(err);
-      setMessages(prev => [...prev, { role: "bot", text: "Sorry, something went wrong. Please visit the admin office.", time: now }]);
+      setMessages(prev => [...prev, {
+        role: "bot",
+        text: "Sorry, something went wrong. Please visit the admin office.",
+        time: now
+      }]);
     }
     setIsTyping(false);
   };
@@ -102,7 +107,7 @@ const App = () => {
           <header className="chat-header">
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <div className="pu-logo-wrapper">
-                <img src="pu-logo.png" alt="PU Logo" className="pu-logo" />
+                <img src="/pu-logo.png" alt="PU Logo" className="pu-logo" />
               </div>
               <h1>PU Assistant</h1>
             </div>
@@ -112,66 +117,72 @@ const App = () => {
           </header>
 
           <main className="chat-body" ref={chatBodyRef}>
-            {messages.map((msg, i) => (
-              <div key={i} className={`message-row ${msg.role}`}>
-                {msg.role === "followup" ? (
-                  <div className="followup-block">
-                    <div className="follow-up-title">{msg.text}</div>
-                    <div className="quick-tags-inline">
-                      {msg.quickTags?.map((tag, idx) => (
-                        <span key={idx} className="quick-tag" onClick={() => handleSend(tag)}>
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className={`message-bubble ${msg.role}`}>
-                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+  {messages.map((msg, i) => (
+    <div key={i} className={`message-row ${msg.role}`}>
+      <div className={`message-bubble ${msg.role}`}>
+        <ReactMarkdown
+          components={{
+            a: ({ href, children }) => (
+              <a href={href} target="_blank" rel="noopener noreferrer">
+                {children}
+              </a>
+            ),
+          }}
+        >
+          {msg.text}
+        </ReactMarkdown>
 
-                    {msg.pdfUrl && (
-                      <a
-                        href={msg.pdfUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="download-pdf-btn"
-                      >
-                        📄 Download Fee Structure PDF
-                      </a>
-                    )}
+        {msg.pdfUrl && (
+          <a
+            href={msg.pdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="download-pdf-btn"
+          >
+            📄 Download Fee Structure PDF
+          </a>
+        )}
 
-                    {msg.quickTags && (
-                      <div className="quick-tags-inline">
-                        {msg.quickTags.map((tag, idx) => (
-                          <span key={idx} className="quick-tag" onClick={() => handleSend(tag)}>
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    <div className="message-time">{msg.time}</div>
-                  </div>
-                )}
-              </div>
-            ))}
-            {isTyping && (
-              <div className="message-row bot">
-                <div className="message-bubble bot">
-                  <div className="typing-indicator">
-                    <span></span><span></span><span></span>
-                  </div>
-                </div>
-              </div>
-            )}
-            {showScrollButton && (
-              <button
-                className="scroll-to-bottom"
-                onClick={() => chatBodyRef.current?.scrollTo({ top: chatBodyRef.current.scrollHeight, behavior: "smooth" })}
-              >
-                <FaArrowDown />
-              </button>
-            )}
-          </main>
+        <div className="message-time">{msg.time}</div>
+      </div>
+
+      {/* ✅ Move quickTags BELOW the message bubble */}
+      {msg.quickTags && msg.quickTags.length > 0 && (
+        <div className="quick-tags-inline">
+          {msg.quickTags.map((tag, idx) => (
+            <span key={idx} className="quick-tag" onClick={() => handleSend(tag)}>
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  ))}
+
+  {isTyping && (
+    <div className="message-row bot">
+      <div className="message-bubble bot">
+        <div className="typing-indicator">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {showScrollButton && (
+    <button
+      className="scroll-to-bottom"
+      onClick={() =>
+        chatBodyRef.current?.scrollTo({
+          top: chatBodyRef.current.scrollHeight,
+          behavior: "smooth"
+        })
+      }
+    >
+      <FaArrowDown />
+    </button>
+  )}
+</main>
 
           <div className="chat-footer">
             <div className="input-box">
