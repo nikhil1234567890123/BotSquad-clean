@@ -204,7 +204,7 @@ def chat():
 @app.route('/files/<path:filename>', methods=['GET'])
 def download_file(filename):
     return send_from_directory('static', filename, as_attachment=True)
-    
+
 @app.route("/healthz", methods=["GET"])
 def health_check():
     return "OK", 200
