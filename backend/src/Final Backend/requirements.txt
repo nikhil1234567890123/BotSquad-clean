@@ -4,9 +4,8 @@ python-dotenv
 
 llama-index
 llama-index-core
+llama-index-readers-file
 llama-index-embeddings-huggingface
-llama-index-llms-groq
+openai
 
-sentence-transformers
-transformers
-torch
+tiktoken
