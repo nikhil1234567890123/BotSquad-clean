@@ -2,8 +2,12 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from llama_index.llms.groq import Groq
 from llama_index.core import StorageContext, load_index_from_storage
+from llama_index.vector_stores.chroma import ChromaVectorStore
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.llms.groq import Groq
+from chromadb import PersistentClient
+from sentence_transformers import CrossEncoder
 from intent_links import intent_to_url
 
 # ---------- ENV + INIT ----------
@@ -13,15 +17,31 @@ def load_environment():
 def init_llm():
     return Groq(model="llama3-8b-8192", api_key=os.getenv("GROQ_API_KEY"), temperature=0.1)
 
-def load_index(persist_dir="./index"):
-    storage_context = StorageContext.from_defaults(persist_dir=persist_dir)
-    return load_index_from_storage(storage_context)
+def init_embed_model():
+    return HuggingFaceEmbedding(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+def init_reranker():
+    return CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+
+def init_vector_store(persist_dir="./chroma_db", collection_name="rag-collection"):
+    client = PersistentClient(path=persist_dir)
+    collection = client.get_or_create_collection(collection_name)
+    return ChromaVectorStore(chroma_collection=collection, persist_path=persist_dir)
+
+def load_index(persist_dir="./chroma_db", index_dir="./index", embed_model=None, vector_store=None):
+    storage_context = StorageContext.from_defaults(persist_dir=index_dir, vector_store=vector_store)
+    return load_index_from_storage(storage_context, embed_model=embed_model)
 
 def initialize_pipeline():
     load_environment()
+    embed_model = init_embed_model()
+    vector_store = init_vector_store()
     return {
         "llm": init_llm(),
-        "index": load_index()
+        "embed_model": embed_model,
+        "reranker": init_reranker(),
+        "vector_store": vector_store,
+        "index": load_index(embed_model=embed_model, vector_store=vector_store)
     }
 
 # ---------- SESSION ----------
@@ -48,7 +68,7 @@ def generate_answer(query, pipeline):
     prompt = f"""
 You are PU-Assistant, the official AI helpdesk chatbot of Panjab University, Chandigarh.
 
-You must answer the student's query **strictly** using the verified information provided below in the context.
+You must answer the student's query strictly using the verified information provided below in the context.
  Never use your own knowledge, never guess, and never add anything not explicitly present in the context.
 
 Answering Rules (apply exactly as written):
@@ -57,7 +77,7 @@ Answering Rules (apply exactly as written):
 2. For simple factual or definition-style questions:
    → Reply in one direct, precise sentence.
 3. If any web page, downloadable form, or PDF is mentioned in the context:
-   → → Include it in the response as a clickable markdown link, but **always** use the exact text given by the system later (e.g., "📄 Download official fee PDF here" or "🌐 Visit official admission portal"). Never write “Visit official page” or “Visit official website” yourself.
+   → → Include it in the response as a clickable markdown link, but always use the exact text given by the system later (e.g., "📄 Download official fee PDF here" or "🌐 Visit official admission portal"). Never write “Visit official page” or “Visit official website” yourself.
    → Only include links that are clearly found in the context.
 4. All links must open in a new browser tab.
 5. Never guess, assume, or generate a URL or link that is not found in the context.
@@ -73,14 +93,14 @@ Answering Rules (apply exactly as written):
 10. Avoid repetition and unnecessary introductions.
 11. IMPORTANT: Always answer using exactly the same bullet titles, same order, and same style every time this question is asked — so repeated questions get the same answer.
 12. Strictly answer only from the "Verified Information" context below.
-13. If required details (like exam name, eligibility, process) are present in context, you **must** include them.
-14. Do **NOT** add any information not present in context.
+13. If required details (like exam name, eligibility, process) are present in context, you must include them.
+14. Do NOT add any information not present in context.
 15. You must answer strictly about the admission process only, if that's what is asked.
 16. Ignore fee, hostel, scholarships, or anything else even if present in context, unless specifically asked.
 17. If the user's question contains an unclear, misspelled, or unknown word (e.g., "stuce") and you don't know its meaning, do NOT guess.
     → Instead, politely ask:
     > Sorry, could you please clarify what you meant by "stuce"?
-18. If same question is asked again, answer *exactly* the same as before, unless context changed.
+18. If same question is asked again, answer exactly the same as before, unless context changed.
 
 Smart Clarification Logic (very important):
 - If the student's question is vague, generic, incomplete, or broad (e.g., “fee structure”, “course”, “apply”, “form”, “hostel”, “scholarship”, etc.):
@@ -120,13 +140,13 @@ Follow-Up Suggestions (only after giving a complete answer):
  - Question 2  
  - Question 3
 
-**Use only this verified information to answer:**
+Use only this verified information to answer:
 {context}
 
-**Student’s Question:**
+Student’s Question:
 {query}
 
-**Your Answer:**
+Your Answer:
 """.strip()
 
     response = llm.complete(prompt)
@@ -170,7 +190,7 @@ Follow-Up Suggestions (only after giving a complete answer):
     }
 
 # ---------- FLASK ----------
-app = Flask(__name__)
+app = Flask(name)
 CORS(app)
 pipeline = initialize_pipeline()
 
@@ -189,6 +209,5 @@ def download_file(filename):
 def health_check():
     return "OK", 200
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+if name == "main":
+    app.run(host='0.0.0.0', port=5000)
