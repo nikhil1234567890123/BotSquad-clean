@@ -1,8 +1,9 @@
 services:
   - type: web
-    name: pu-chatbot-backend
+    name: rag-chatbot-backend
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
-    runtime: python
-    pythonVersion: 3.10
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python rag_pipeline.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
