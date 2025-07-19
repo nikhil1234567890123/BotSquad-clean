@@ -6,6 +6,6 @@ llama-index
 llama-index-core
 llama-index-readers-file
 llama-index-embeddings-huggingface
-openai
 
+openai
 tiktoken
