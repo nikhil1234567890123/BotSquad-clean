@@ -2,7 +2,7 @@ Flask
 flask-cors
 python-dotenv
 
-llama-index
+llama-index==0.12.48
 chromadb
 sentence-transformers
 transformers
