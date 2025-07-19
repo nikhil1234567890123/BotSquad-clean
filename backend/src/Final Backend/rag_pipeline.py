@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from llama_index.vector_stores.simple import SimpleVectorStore
+from llama_index.vector_stores import SimpleVectorStore  # ✅ works in 0.10.39
 from llama_index.core import (
     StorageContext,
     load_index_from_storage,
