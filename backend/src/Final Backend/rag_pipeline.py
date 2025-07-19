@@ -2,7 +2,8 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from llama_index.vector_stores import SimpleVectorStore
+
+from llama_index.vector_stores.simple import SimpleVectorStore  # ✅ Correct import
 from llama_index.core import (
     StorageContext,
     load_index_from_storage,
@@ -10,7 +11,6 @@ from llama_index.core import (
     SimpleDirectoryReader,
     ServiceContext,
 )
-from llama_index.vector_stores import SimpleVectorStore
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.groq import Groq
 from chromadb import PersistentClient
