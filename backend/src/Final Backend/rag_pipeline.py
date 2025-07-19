@@ -2,11 +2,9 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from llama_index.core import StorageContext, load_index_from_storage
-from llama_index.vector_stores.chroma import ChromaVectorStore
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.groq import Groq
-from chromadb import PersistentClient
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, ServiceContext
 from sentence_transformers import CrossEncoder
 from intent_links import intent_to_url
 
@@ -23,25 +21,19 @@ def init_embed_model():
 def init_reranker():
     return CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
 
-def init_vector_store(persist_dir="./chroma_db", collection_name="rag-collection"):
-    client = PersistentClient(path=persist_dir)
-    collection = client.get_or_create_collection(collection_name)
-    return ChromaVectorStore(chroma_collection=collection, persist_path=persist_dir)
-
-def load_index(persist_dir="./chroma_db", index_dir="./index", embed_model=None, vector_store=None):
-    storage_context = StorageContext.from_defaults(persist_dir=index_dir, vector_store=vector_store)
-    return load_index_from_storage(storage_context, embed_model=embed_model)
+def build_index(embed_model):
+    docs = SimpleDirectoryReader(input_dir="./static/context_files").load_data()
+    service_context = ServiceContext.from_defaults(embed_model=embed_model)
+    return VectorStoreIndex.from_documents(docs, service_context=service_context)
 
 def initialize_pipeline():
     load_environment()
     embed_model = init_embed_model()
-    vector_store = init_vector_store()
     return {
         "llm": init_llm(),
         "embed_model": embed_model,
         "reranker": init_reranker(),
-        "vector_store": vector_store,
-        "index": load_index(embed_model=embed_model, vector_store=vector_store)
+        "index": build_index(embed_model)
     }
 
 # ---------- SESSION ----------
@@ -53,7 +45,6 @@ def generate_answer(query, pipeline):
     index = pipeline["index"]
 
     vague_keywords = ["fee", "admission", "form", "hostel", "apply", "scholarship", "process"]
-
     if session["expecting_clarification"] and session["original_query"]:
         query = f"{session['original_query']} for {query}"
         session["original_query"] = None
