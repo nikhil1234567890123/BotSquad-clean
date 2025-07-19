@@ -1,8 +1,8 @@
-llama-index==0.10.39
-chromadb
 flask
 flask-cors
 python-dotenv
+llama-index==0.10.39
+chromadb
 sentence-transformers
 transformers
-nltk
+torch==2.1.2
