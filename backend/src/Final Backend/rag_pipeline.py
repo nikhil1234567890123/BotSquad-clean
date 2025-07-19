@@ -2,10 +2,8 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
-from llama_index.embeddings.openai import OpenAIEmbedding
-from llama_index.llms.openai import OpenAI
-from sentence_transformers import CrossEncoder
+from llama_index.llms.groq import Groq
+from llama_index.core import StorageContext, load_index_from_storage
 from intent_links import intent_to_url
 
 # ---------- ENV + INIT ----------
@@ -13,26 +11,17 @@ def load_environment():
     load_dotenv()
 
 def init_llm():
-    return OpenAI(model="gpt-3.5-turbo", api_key=os.getenv("OPENAI_API_KEY"), temperature=0.1)
+    return Groq(model="llama3-8b-8192", api_key=os.getenv("GROQ_API_KEY"), temperature=0.1)
 
-def init_embed_model():
-    return OpenAIEmbedding(api_key=os.getenv("OPENAI_API_KEY"))
-
-def init_reranker():
-    return CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
-
-def load_index(embed_model):
-    documents = SimpleDirectoryReader("./data").load_data()
-    return VectorStoreIndex.from_documents(documents, embed_model=embed_model)
+def load_index(persist_dir="./index"):
+    storage_context = StorageContext.from_defaults(persist_dir=persist_dir)
+    return load_index_from_storage(storage_context)
 
 def initialize_pipeline():
     load_environment()
-    embed_model = init_embed_model()
     return {
         "llm": init_llm(),
-        "embed_model": embed_model,
-        "reranker": init_reranker(),
-        "index": load_index(embed_model)
+        "index": load_index()
     }
 
 # ---------- SESSION ----------
@@ -165,12 +154,12 @@ Follow-Up Suggestions (only after giving a complete answer):
 
     if "fee" in query_lower and "pdf" not in answer_main.lower():
         pdf_url = "http://127.0.0.1:5000/files/pu_fee_structure.pdf"
-        friendly_label = f"\n\n\ud83d\udcc4 [Download official fee PDF here]({pdf_url})"
+        friendly_label = f"\n\n📄 [Download official fee PDF here]({pdf_url})"
     elif detected_link and detected_link not in answer_main:
         if "admission" in query_lower or "apply" in query_lower:
-            friendly_label = f"\n\n\ud83c\udf10 [Visit official admission portal]({detected_link})"
+            friendly_label = f"\n\n🌐 [Visit official admission portal]({detected_link})"
         else:
-            friendly_label = f"\n\n\ud83d\udd17 [Visit official related page]({detected_link})"
+            friendly_label = f"\n\n🔗 [Visit official related page]({detected_link})"
 
     if friendly_label and friendly_label not in answer_main:
         answer_main += friendly_label
@@ -201,4 +190,5 @@ def health_check():
     return "OK", 200
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
